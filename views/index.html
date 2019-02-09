@@ -1,0 +1,76 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>chessboard.js &raquo; Home</title>
+  <meta name="viewport" content="width=980px, initial-scale=1">
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/normalize-2.1.2.min.css" />
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" />
+  <link rel="stylesheet" href="css/site2.css" />
+  <link rel="stylesheet" href="css/chessboard.css" />
+</head>
+<body>
+
+<div id="heroWrapper">
+
+
+
+
+<div class="body-width">
+
+
+<div class="col">
+  <h3>Enter your name</h3>
+  <input type="text" id = "name"  >
+  <input type="button" id="addName" value="Add" />
+  <input type="button" id="join_a_game" value="Join a game">
+</div>
+<div class="clearfix"></div>
+    Available games: <select name="gamesList" id="gamesList"></select>
+    <input type="button" id="startGame" value="START" />
+</div>
+
+<script src="js/json3.min.js"></script>
+<script src="js/jquery-1.10.1.min.js"></script>
+<script src="js/prettify.js"></script>
+<script src="js/chessboard.js"></script>
+<script>
+
+function isTouchDevice() {
+  return ('ontouchstart' in document.documentElement);
+}
+
+window.onload = function(){
+  var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          var games = JSON.parse(xmlhttp.responseText);
+          populateList(games);
+      }
+    }
+    xmlhttp.open( "GET", "http://localhost:8080/get-games", true ); 
+    xmlhttp.send();
+
+    function populateList(games){
+      var gamesList = document.getElementById("gamesList");
+
+      for(i = 0;i<games.length;i++){
+        if(games[i].player2WebsocketId != null){
+          var option = document.createElement("option");
+
+          option.text = games[i]._id;
+          option.value = games[i]._id;
+          gamesList.add(option, null);
+        }
+      }
+    }
+}
+</script>
+
+
+</body>
+</html>

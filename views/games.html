@@ -1,0 +1,185 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>chessboard.js &raquo; Home</title>
+  <meta name="viewport" content="width=980px, initial-scale=1">
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/normalize-2.1.2.min.css" />
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" />
+  <link rel="stylesheet" href="css/site2.css" />
+  <link rel="stylesheet" href="css/chessboard.css" />
+</head>
+<body>
+
+<div id="heroWrapper">
+
+
+<div class="vertical-bar"></div>
+
+<div class="body-width">
+
+
+<div class="col">
+
+
+  <h3>Enter your name</h3>
+  <input type="text" id = "name"><br/>
+  Available games: <select name="gamesList" id="gamesList"></select><br/>
+    <input type="button" id="startGame" value="START" onClick="startGame()" />
+    <input type="button" id="startBtn" value="Start" />
+</div>
+<div class="clearfix"></div>
+
+
+<div class="col">
+  <div id="board2" style="width: 400px;visibility:hidden"></div>
+</div>
+<div class="clearfix"></div>
+
+</div><!-- end .body-width -->
+
+<div id="footerWrapper">
+  <div class="body-width">
+    <div class="left-col">
+      <p>chessboard.js is released under the <a href="https://github.com/oakmac/chessboardjs/blob/master/LICENSE.md">MIT License</a></p>
+      <p>the code can be found on <a href="https://github.com/oakmac/chessboardjs/">GitHub</a></p>
+    </div>
+    <div class="right-col">
+      <a href="">Home</a>
+      <a href="examples">Examples</a>
+      <a href="docs">Docs</a>
+      <a href="download">Download</a>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+</div><!-- end #footerWrapper -->
+
+<script src="js/json3.min.js"></script>
+<script src="js/jquery-1.10.1.min.js"></script>
+<script src="js/prettify.js"></script>
+<script src="js/chessboard.js"></script>
+<script>
+
+function isTouchDevice() {
+  return ('ontouchstart' in document.documentElement);
+}
+
+$(document).ready(function() {
+  prettyPrint();
+
+  // example 1
+  
+
+  // example 2
+  
+  // $('#startBtn').on('click', board2.start);
+  // $('#clearBtn').on('click', board2.clear);
+
+  // prevent "browser drag" of the black king
+  $('#hero img').on('mousedown', function(e) { e.preventDefault(); });
+
+  // prevent hover problems on touch devices
+  if (isTouchDevice() === true) {
+    $('#start').removeClass('hover-effect');
+  }
+});
+</script>
+
+<script >
+
+
+var connection = new WebSocket('ws://localhost:8080/', 'none-protocol');
+var id;
+
+connection.onopen = function(connection) {
+    console.log('WebSocket Client Connected');
+
+    };
+connection.onclose = function() {
+        console.log('echo-protocol Connection Closed');
+    };
+
+connection.onerror = function(error) {
+        console.log("Connection Error: " + error.toString());
+    };
+
+connection.onmessage = function(message){
+   var server_message = message.data;
+   console.log(server_message);
+}
+
+var gameId;
+var clientId;
+
+function sendData(messageType, messageText){
+  
+  var message = {
+    "messageType": messageType,
+    "messageText" : messageText,
+    "gameId" : gameid,
+    "clientId" : clientId 
+  }
+  connection.send(message);
+}
+
+window.onload = function(){
+  var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          var games = JSON.parse(xmlhttp.responseText);
+          populateList(games);
+      }
+    }
+    xmlhttp.open( "GET", "http://localhost:8080/get-games", true ); 
+    xmlhttp.send();
+
+    function populateList(games){
+      var gamesList = document.getElementById("gamesList");
+
+      for(i = 0;i<games.length;i++){
+        if(games[i].player2WebsocketId != null){
+          var option = document.createElement("option");
+
+          option.text = games[i]._id;
+          option.value = games[i]._id;
+          gamesList.add(option, null);
+        }
+      }
+    }
+}
+
+
+  var board2 = ChessBoard('board2', {
+    draggable: true,
+    dropOffBoard: 'trash',
+    sparePieces: true
+  });
+
+  
+
+$('#startBtn').on('click', board2.start);
+  function startGame(){
+    var message = {
+      "playerName" : "",
+      "gameId" : "",
+      "messageType" : ""
+    };
+    if(document.getElementById("name").value == null || document.getElementById("name").value == ""){
+      alert('You have to enter your name first');
+    }
+    else{
+      document.getElementById("board2").style.visibility = "visible";
+
+      message.playerName = document.getElementById("name").value;
+      message.gameId = document.getElementById("gamesList").value;
+      message.messageType = "startGame";
+      connection.send(message);
+    }
+  }
+</script>
+</body>
+</html>
